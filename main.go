@@ -1,24 +1,16 @@
 package main
 
 import (
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"learning/controllers"
 	"learning/middlewares"
 	"learning/models"
 )
 
 func main() {
+	godotenv.Load()
 	router := gin.Default()
-
-	store := cookie.NewStore([]byte("1234"))
-	router.Use(
-		sessions.Sessions(
-			"my_session",
-			store,
-		),
-	)
 
 	db := models.SetupModels()
 

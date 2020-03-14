@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"fmt"
-	"learning/models"
-	"net/http"
-
-	"github.com/gin-contrib/sessions"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"learning/models"
+	"net/http"
+	"os"
 )
 
 func DeleteUser(c *gin.Context) {
@@ -116,11 +116,24 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 	fmt.Println(user)
-	session := sessions.Default(c)
-	session.Set("signed_in", true)
-	session.Save()
+	signing_secret := []byte(os.Getenv("JWT_SECRET"))
+	claims := jwt.MapClaims{
+		"name": user.Name,
+		"Id":   user.ID,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(signing_secret)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
+		"token":   tokenString,
 	})
 }
